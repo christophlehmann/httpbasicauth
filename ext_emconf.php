@@ -8,10 +8,10 @@ $EM_CONF['httpbasicauth'] = [
     'clearCacheOnLoad' => 0,
     'author' => 'Christoph Lehmann',
     'author_email' => 'post@christophlehmann.eu',
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'constraints' => [
         'depends' => [
-            'typo3' => '9.5.0-',
+            'typo3' => '9.5.0-9.5.99',
         ],
         'conflicts' => [
         ],
