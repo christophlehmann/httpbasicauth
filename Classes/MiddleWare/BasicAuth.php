@@ -50,10 +50,18 @@ class BasicAuth implements MiddlewareInterface
             }
         }
 
-        if ($site->getAttribute('basicauth_user') === $_SERVER['PHP_AUTH_USER'] &&
-            $site->getAttribute('basicauth_password') === $_SERVER['PHP_AUTH_PW']
-        ) {
-            return $handler->handle($request);
+        if (preg_match("/Basic\s+(.*)$/i", $request->getHeaderLine("Authorization"), $matches)) {
+            $credentials = explode(":", base64_decode($matches[1]), 2);
+
+            if (count($credentials) == 2) {
+                list($user, $password) = $credentials;
+
+                if ($site->getAttribute('basicauth_user') === $user &&
+                    $site->getAttribute('basicauth_password') === $password
+                ) {
+                    return $handler->handle($request);
+                }
+            }
         }
 
         // @Todo: Return PSR-7 Response ?
