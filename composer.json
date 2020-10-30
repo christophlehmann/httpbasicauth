@@ -32,7 +32,7 @@
     }
   },
   "replace": {
-    "httpbasicauth": "self.version",
+    "christophlehmann/httpbasicauth": "self.version",
     "typo3-ter/httpbasicauth": "self.version"
   }
 }
