@@ -15,16 +15,15 @@ $GLOBALS['SiteConfiguration']['site']['columns']['basicauth_enabled'] = [
         ],
     ]
 ];
-$GLOBALS['SiteConfiguration']['site']['columns']['basicauth_user'] = [
-    'label' => 'Username',
+$GLOBALS['SiteConfiguration']['site']['columns']['basicauth_credentials'] = [
+    'label' => 'Credentials',
+    'description' => 'one user:password combination per line',
     'config' => [
-        'type' => 'input',
-    ],
-];
-$GLOBALS['SiteConfiguration']['site']['columns']['basicauth_password'] = [
-    'label' => 'Password',
-    'config' => [
-        'type' => 'input',
+        'type' => 'text',
+        'placeholder' => 'user:password' . LF . 'user2:password2',
+        'rows' => 5,
+        'cols' => 30,
+        'max' => 2000,
     ],
 ];
 $GLOBALS['SiteConfiguration']['site']['columns']['basicauth_allow_devipmask'] = [
@@ -61,5 +60,6 @@ $GLOBALS['SiteConfiguration']['site']['columns']['basicauth_allow_beuser'] = [
 ];
 
 $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] .= '
-    ,--div--;HTTP Basic Auth, basicauth_enabled, basicauth_user, basicauth_password, basicauth_allow_devipmask, basicauth_allow_beuser
+    ,--div--;HTTP Basic Auth, basicauth_enabled, basicauth_credentials, basicauth_allow_devipmask, basicauth_allow_beuser
 ';
+
