@@ -25,7 +25,7 @@ class HttpbasicauthUpdateWizard implements UpgradeWizardInterface, ChattyInterfa
      */
     public function getIdentifier(): string
     {
-        return 'httpbasicauth';
+        return 'httpbasicauthSupportMultipleUsers';
     }
 
     /**
