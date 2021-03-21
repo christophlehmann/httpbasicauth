@@ -56,15 +56,15 @@ class BasicAuth implements MiddlewareInterface
             if (count($credentials) == 2) {
                 list($user, $password) = $credentials;
 
-                $basicauth_credentials = GeneralUtility::trimExplode(
+                $basicauthCredentials = GeneralUtility::trimExplode(
                     LF,
                     $site->getAttribute('basicauth_credentials'),
                     true
                 );
-                foreach ($basicauth_credentials ?? [] as $basicauth_credential){
-                    list($basicauth_user, $basicauth_password) = GeneralUtility::trimExplode(':', $basicauth_credential, true, 2 );
-                    if ($basicauth_user === $user &&
-                        $basicauth_password === $password
+                foreach ($basicauthCredentials ?? [] as $basicauthCredential){
+                    list($basicauthUser, $basicauthPassword) = GeneralUtility::trimExplode(':', $basicauthCredential, true, 2 );
+                    if ($basicauthUser === $user &&
+                        $basicauthPassword === $password
                     ) {
                         return $handler->handle($request);
                     }
