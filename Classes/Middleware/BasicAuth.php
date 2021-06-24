@@ -21,7 +21,7 @@ class BasicAuth implements MiddlewareInterface
     {
         /** @var Site $site */
         $site = $request->getAttribute('site');
-        if (!$site) {
+        if (!$site instanceof Site) {
             return $handler->handle($request);
         }
 
