@@ -9,6 +9,7 @@ $GLOBALS['SiteConfiguration']['site']['columns']['basicauth_enabled'] = [
             [
                 0 => '',
                 1 => '',
+                'label' => '',
                 'labelChecked' => 'Enabled',
                 'labelUnchecked' => 'Disabled',
             ]
@@ -36,6 +37,7 @@ $GLOBALS['SiteConfiguration']['site']['columns']['basicauth_allow_devipmask'] = 
             [
                 0 => '',
                 1 => '',
+                'label' => '',
                 'labelChecked' => 'Enabled',
                 'labelUnchecked' => 'Disabled',
             ]
@@ -52,6 +54,7 @@ $GLOBALS['SiteConfiguration']['site']['columns']['basicauth_allow_beuser'] = [
             [
                 0 => '',
                 1 => '',
+                'label' => '',
                 'labelChecked' => 'Enabled',
                 'labelUnchecked' => 'Disabled',
             ]
