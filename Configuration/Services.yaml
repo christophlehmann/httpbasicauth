@@ -1,0 +1,14 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Lemming\Httpbasicauth\:
+    resource: '../Classes/*'
+
+  Lemming\Httpbasicauth\EventListener\DisableStaticFileCacheEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'HTTPBasicAuthDisableStaticFileCacheEventListener'
+        event: SFC\Staticfilecache\Event\CacheRuleEvent

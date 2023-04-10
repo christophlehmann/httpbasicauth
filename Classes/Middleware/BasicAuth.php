@@ -12,6 +12,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class BasicAuth implements MiddlewareInterface
 {
+    public const IS_ENABLED = 'BasicAuthenticationIsEnabled';
+
     /**
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
@@ -33,6 +35,8 @@ class BasicAuth implements MiddlewareInterface
             // Attribute maybe not set after installing this extension?
             return $handler->handle($request);
         }
+
+        $request = $request->withAttribute(self::IS_ENABLED, true);
 
         if ($site->getAttribute('basicauth_allow_devipmask')) {
             $clientIPMatchesDevelopmentSystem = GeneralUtility::cmpIP(GeneralUtility::getIndpEnv('REMOTE_ADDR'),
