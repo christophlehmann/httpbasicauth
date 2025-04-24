@@ -13,7 +13,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class BasicAuth implements MiddlewareInterface
 {
-
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $site = $request->getAttribute('site');
@@ -25,20 +24,55 @@ class BasicAuth implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        if ($this->isAccessGrantedForDeveloperIps($site) && $this->isVisitorIpMatchingDeveloperIpMask()) {
+        if ($this->isAccessGrantedForDeveloperIps($site) && $this->isVisitorIpMatchingDeveloperIpMask($request)) {
             return $handler->handle($request);
         }
 
-        if ($this->isAccessGrantedForBackendUsers($site) && $this->isVisitorABackendUser()) {
+        if ($this->isAccessGrantedForBackendUsers($site) && $this->visitorIsBackendUser()) {
             return $handler->handle($request);
         }
 
-        $authorizationHeaderCredentials = $this->getCredentialsFromAuthorizationHeader($request);
-        if ($authorizationHeaderCredentials && in_array($authorizationHeaderCredentials, $this->getCredentials($site))) {
-            return $handler->handle($request);
+        if (!$this->login($request, $site)) {
+            return new HtmlResponse('Not authorized', 401, ['WWW-Authenticate' => 'Basic realm="TYPO3"']);
         }
 
-        return new HtmlResponse('Not authorized', 401, ['WWW-Authenticate' => 'Basic realm="Not authorized"']);
+        return $handler->handle($request);
+    }
+
+    protected function login(ServerRequestInterface $request, Site $site): bool
+    {
+        $authorization = $this->parseHeader($request->getHeaderLine('Authorization'));
+        if ($authorization === null || $authorization === []) {
+            return false;
+        }
+
+        // Load credentials
+        $credentials = $this->loadCredentialsForSite($site);
+
+        // Check the user
+        if (!isset($credentials[$authorization['username']])) {
+            return false;
+        }
+
+        return password_verify((string) $authorization['password'], (string) $credentials[$authorization['username']]);
+    }
+
+    private function parseHeader(string $header): ?array
+    {
+        if (!str_starts_with($header, 'Basic')) {
+            return null;
+        }
+
+        $decodedHeader = base64_decode(substr($header, 6));
+        if (!$decodedHeader) {
+            return null;
+        }
+
+        $headerParts = explode(':', $decodedHeader, 2);
+        return [
+            'username' => $headerParts[0],
+            'password' => $headerParts[1] ?? null,
+        ];
     }
 
     protected function isBasicAuthenticationEnabled(Site $site): bool
@@ -61,10 +95,10 @@ class BasicAuth implements MiddlewareInterface
         }
     }
 
-    protected function isVisitorIpMatchingDeveloperIpMask(): bool
+    protected function isVisitorIpMatchingDeveloperIpMask(ServerRequestInterface $request): bool
     {
         return GeneralUtility::cmpIP(
-            GeneralUtility::getIndpEnv('REMOTE_ADDR'),
+            $request->getServerParams()['REMOTE_ADDR'] ?? '',
             $GLOBALS['TYPO3_CONF_VARS']['SYS']['devIPmask']
         );
     }
@@ -79,34 +113,28 @@ class BasicAuth implements MiddlewareInterface
         }
     }
 
-    protected function isVisitorABackendUser(): bool
+    protected function visitorIsBackendUser(): bool
     {
         $context = GeneralUtility::makeInstance(Context::class);
         return $context->getPropertyFromAspect('backend.user', 'id') > 0;
     }
 
-    protected function getCredentialsFromAuthorizationHeader(ServerRequestInterface $request): ?string
-    {
-        if (preg_match("/Basic\s+(.*)$/i", $request->getHeaderLine("Authorization"), $matches)) {
-            $credentials = base64_decode($matches[1]);
-            $usernamePasswordSeparator = ':';
-            if (str_contains($credentials, $usernamePasswordSeparator)
-                && !str_starts_with($credentials, $usernamePasswordSeparator)
-            ) {
-                return $credentials;
-            }
-        }
-        return null;
-    }
-
-    protected function getCredentials(Site $site): array
+    protected function loadCredentialsForSite(Site $site): array
     {
         try {
-            $credentials = GeneralUtility::trimExplode(
-                LF,
-                $site->getAttribute('basicauth_credentials'),
-                true
-            );
+            $lines = preg_split('/\R+/', $site->getAttribute('basicauth_credentials')) ?: [];
+
+            $credentials = [];
+            foreach ($lines as $line) {
+                $parts = GeneralUtility::trimExplode(':', $line, limit: 2);
+
+                if (count($parts) < 2) {
+                    continue;
+                }
+
+                $credentials[$parts[0]] = $parts[1];
+            }
+
             return $credentials;
         } catch (\InvalidArgumentException) {
             // Attribute does not exist
